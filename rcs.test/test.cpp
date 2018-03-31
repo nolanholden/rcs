@@ -81,7 +81,6 @@ ceiling_divide(T num, U den) {
 }
 
 using namespace rcs;
-using namespace rcs::detail;
 using namespace rcs::utility;
 using namespace rcs::comm;
 using namespace rcs::comm::tele;
@@ -114,7 +113,7 @@ auto test_partitioning(const payload& _payload, std::size_t max_allowed) {
                            // handle zero-size payloads.
     total_size_received += p.size;
     for (auto i = decltype(p.size){}; i < p.size; ++i) {
-      ASSERT_EQ(static_cast<byte_t>(buffer_position), p.bytes[i]);
+      EXPECT_EQ(static_cast<byte_t>(buffer_position), p.bytes[i]);
       ++buffer_position;
     }
     return error::none;
