@@ -197,7 +197,7 @@ expect_byte_parsing_result_eq(const T& value_expr) {
   std::decay_t<T> parsed_value;
   from_bytes(parsed_value, underlying_bytes);
   
-  if (!(value_expr == value_expr)) { // NaN
+  if (!(value_expr == value_expr)) { // catch NaN case
     EXPECT_FALSE(original_value == parsed_value);
     EXPECT_FALSE(value_expr == parsed_value);
     EXPECT_FALSE(parsed_value == parsed_value);
