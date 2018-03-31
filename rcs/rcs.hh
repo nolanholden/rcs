@@ -13,59 +13,75 @@ struct task_info {
   static constexpr const char* description = "default";
 };
 
-#define QUOTE(str) #str
 #define SCHEDULED_TASK( \
     function_name, \
     await_time, \
     action) \
   template <typename T> \
-  void function_name(T&& time) { \
-    using us_time_type = typename std::decay<decltype(time())>::type; \
+  void function_name(T&& clock) { \
+    using us_time_type = typename std::decay<decltype(clock.micros())>::type; \
     static_assert(std::is_unsigned<us_time_type>::value, "system time must be given as unsigned integral value"); \
     static_assert(std::is_integral<decltype(await_time)>::value && await_time > 0, "must await a positive integral time interval"); \
     \
     static us_time_type last_time = 0; \
-    const auto& now = time(); \
+    const auto& now = std::forward<T>(clock).micros(); \
     const auto& delta = now - last_time;  /* defined by ISO C++ */ \
     last_time = now; \
     if (delta >= await_time) action(); \
-  } \
-  \
-  template <> struct task_info< __COUNTER__ > { \
-    static constexpr const char* description = "task " QUOTE(__COUNTER__) ": "; \
-  };
+  }
 
 auto go() {}
 SCHEDULED_TASK(do_every_100, 100, go)
 
-template <typename T>
-struct task_runner {
-  const T& tasks;
+enum class task_id {
+  send_telemetry,
+  update_imu,
+  total_ids
+};
+struct task {
+  bool should_run;
+  auto run() const {};
+};
 
-  template <typename U>
-  constexpr task_runner(U&& _tasks)
-    : tasks(std::forward<U>(_tasks)) {}
+template <typename TaskIdEnum>
+class task_runner {
+ public:
+  using id_t = TaskIdEnum;
+
+ private:
+  constexpr auto 
+  id_index(id_t id) { return static_cast<std::size_t>(id); };
+
+  task* tasks[TaskIdEnum::NUM_TASKS];
+
+  auto enable_impl(id_t id, bool should_run) {
+    tasks[id_index(id)] = should_run;
+  }
+
+ public:
+  task_runner& add_task(task t) { tasks.emplace(std::move(t)); }
+  auto enable(id_t id) { enable_impl(id, true); }
+  auto disable(id_t id) { enable_impl(id, false); }
+
+  constexpr inline auto 
+  run_all() const {
+    for (const auto& p : tasks)
+      if (p.second != nullptr && p.second.should_run)
+        p.second.run();
+  }
 
   // cease when _continue() returns false;
   template <typename ConditionFunc>
   constexpr auto
-  run_tasks(ConditionFunc&& _continue) const {
+  run_while(ConditionFunc&& _continue) const {
     auto&& continue__ = std::forward<ConditionFunc>(_continue);
-    while (continue__())
-      for (const auto& t : tasks)
-        t();
+    while (continue__()) run_all();
   }
 };
 
-template <typename T>
-constexpr auto
-make_task_runner(T&& tasks) {
-  return task_runner<T>(std::forward<T>(tasks));
-}
-
 void setup() {
-  using namespace std::literals::chrono_literals;
-  auto s = 1s;
+  //using namespace std::literals::chrono_literals;
+  //auto s = 1s;
   // initialize digital pin 13 as an output.
   /*pinMode(13, OUTPUT);*/
 }
