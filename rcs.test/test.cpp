@@ -85,6 +85,8 @@ using namespace rcs::utility;
 using namespace rcs::comm;
 using namespace rcs::comm::tele;
 
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%% TELEMETRY TESTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 TEST(telemetry_send, can_send) {
   byte_t bytes[] = { 0,1,2,3,4,5,6,7,8,9, };
   std::size_t max_allowed = ARR_SIZE(bytes) + 1; // larger than whole buffer
@@ -180,3 +182,91 @@ TEST(radio, calls_configured_send_function) {
   r.send(payload{ bytes, 3 });
   EXPECT_TRUE(called);
 }
+
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%% UTILITY TESTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+template <typename T>
+constexpr auto
+expect_byte_parsing_result_eq(const T& value_expr) {
+  const auto original_value = value_expr;
+   
+  const auto num_bytes = sizeof(original_value);
+  byte_t underlying_bytes[num_bytes];
+  append_bytes(underlying_bytes, original_value);
+   
+  std::decay_t<T> parsed_value;
+  from_bytes(parsed_value, underlying_bytes);
+  
+  if (!(value_expr == value_expr)) { // NaN
+    EXPECT_FALSE(original_value == parsed_value);
+    EXPECT_FALSE(value_expr == parsed_value);
+    EXPECT_FALSE(parsed_value == parsed_value);
+  } else {
+    EXPECT_EQ(original_value, parsed_value);
+    EXPECT_EQ(value_expr, parsed_value);
+  }
+}
+
+template <typename T>
+auto expect_byte_parsing_results_eq_for_type() {
+  expect_byte_parsing_result_eq( T{});
+  expect_byte_parsing_result_eq(-T{});
+  expect_byte_parsing_result_eq( std::numeric_limits<T>::denorm_min());
+  expect_byte_parsing_result_eq(-std::numeric_limits<T>::denorm_min());
+  expect_byte_parsing_result_eq( std::numeric_limits<T>::epsilon());
+  expect_byte_parsing_result_eq(-std::numeric_limits<T>::epsilon());
+  expect_byte_parsing_result_eq( std::numeric_limits<T>::infinity());
+  expect_byte_parsing_result_eq(-std::numeric_limits<T>::infinity());
+  expect_byte_parsing_result_eq( std::numeric_limits<T>::lowest());
+  expect_byte_parsing_result_eq(-std::numeric_limits<T>::lowest());
+  for (T f =  std::numeric_limits<T>::max(); f >  0.; f /= static_cast<T>(5.1f))
+    expect_byte_parsing_result_eq(T{ f });
+  for (T f = -std::numeric_limits<T>::max(); f < -0.; f /= static_cast<T>(5.1f))
+    expect_byte_parsing_result_eq(T{ f });
+  expect_byte_parsing_result_eq( std::numeric_limits<T>::min());
+  expect_byte_parsing_result_eq(-std::numeric_limits<T>::min());
+  expect_byte_parsing_result_eq( std::numeric_limits<T>::quiet_NaN());
+  expect_byte_parsing_result_eq(-std::numeric_limits<T>::quiet_NaN());
+  expect_byte_parsing_result_eq( std::numeric_limits<T>::signaling_NaN());
+  expect_byte_parsing_result_eq(-std::numeric_limits<T>::signaling_NaN());
+  expect_byte_parsing_result_eq( std::numeric_limits<T>::round_error());
+  expect_byte_parsing_result_eq(-std::numeric_limits<T>::round_error());
+}
+
+TEST(append_bytes, floating_point) {
+  using namespace std;
+  expect_byte_parsing_results_eq_for_type<int8_t>();
+  expect_byte_parsing_results_eq_for_type<int16_t>();
+  expect_byte_parsing_results_eq_for_type<int32_t>();
+  expect_byte_parsing_results_eq_for_type<int64_t>();
+  expect_byte_parsing_results_eq_for_type<uint8_t>();
+  expect_byte_parsing_results_eq_for_type<uint16_t>();
+  expect_byte_parsing_results_eq_for_type<uint32_t>();
+  expect_byte_parsing_results_eq_for_type<uint64_t>();
+
+  expect_byte_parsing_results_eq_for_type<int_least8_t>();
+  expect_byte_parsing_results_eq_for_type<int_least16_t>();
+  expect_byte_parsing_results_eq_for_type<int_least32_t>();
+  expect_byte_parsing_results_eq_for_type<int_least64_t>();
+  expect_byte_parsing_results_eq_for_type<uint_least8_t>();
+  expect_byte_parsing_results_eq_for_type<uint_least16_t>();
+  expect_byte_parsing_results_eq_for_type<uint_least32_t>();
+  expect_byte_parsing_results_eq_for_type<uint_least64_t>();
+
+  expect_byte_parsing_results_eq_for_type<int_fast8_t>();
+  expect_byte_parsing_results_eq_for_type<int_fast16_t>();
+  expect_byte_parsing_results_eq_for_type<int_fast32_t>();
+  expect_byte_parsing_results_eq_for_type<int_fast64_t>();
+  expect_byte_parsing_results_eq_for_type<uint_fast8_t>();
+  expect_byte_parsing_results_eq_for_type<uint_fast16_t>();
+  expect_byte_parsing_results_eq_for_type<uint_fast32_t>();
+  expect_byte_parsing_results_eq_for_type<uint_fast64_t>();
+
+  expect_byte_parsing_results_eq_for_type<intmax_t>();
+  expect_byte_parsing_results_eq_for_type<uintmax_t>();
+
+  expect_byte_parsing_results_eq_for_type<float>();
+  expect_byte_parsing_results_eq_for_type<double>();
+}
+
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%% COMMAND TESTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
