@@ -42,4 +42,4 @@
 *.sln
 *.vcxproj
 *.filters
-*.config
+*packages.config
