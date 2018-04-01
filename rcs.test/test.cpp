@@ -58,6 +58,7 @@
 //}
 
 #include "pch.h"
+#include "gtest/gtest.h"
 
 #include "../rcs/rcs.hh"
 #include "../rcs/radio.hh"

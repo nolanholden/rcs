@@ -6,7 +6,7 @@
 #include <type_traits>
 #include <limits>
 #include <bitset>
-
+#include <ios>
 namespace rcs {
 
 /**
@@ -56,6 +56,8 @@ template <typename Byte,
   typename Data> constexpr inline auto
 append_bytes(Byte* destination, const Data& data) {
   static_assert(sizeof(Byte) == 1, "Byte must be exactly 8 bits");
+  static_assert(std::is_trivial<Data>::value, "template parameter `Data` must be trivial type");
+  static_assert(std::is_standard_layout<Data>::value, "template parameter `Data` must be standard layout");
   const auto& data_ptr = &data;
   memcpy(destination, data_ptr, sizeof(data));
 }
@@ -64,6 +66,8 @@ template <typename Byte,
   typename Data> constexpr inline auto
 from_bytes(Data& data, Byte* destination) {
   static_assert(sizeof(Byte) == 1, "Byte must be exactly 8 bits");
+  static_assert(std::is_trivial<Data>::value, "template parameter `Data` must be trivial type");
+  static_assert(std::is_standard_layout<Data>::value, "template parameter `Data` must be standard layout");
   const auto& data_ptr = &data;
   memcpy(data_ptr, destination, sizeof(data));
 }
