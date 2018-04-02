@@ -16,6 +16,7 @@ struct payload { // TODO: use std::array<,> or similar
   const byte_t* bytes;
   std::size_t size;
 };
+
 struct radio_config {
   std::function<error(const payload&)> send_payload;
   std::size_t max_payload_size;

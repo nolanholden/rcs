@@ -1,64 +1,5 @@
-//#include "pch.h"
-//
-//#include "../rcs/rcs.hh"
-//
-//#include <chrono>
-//#include <cstddef>
-//#include <functional>
-//#include <utility>
-//#include <vector>
-//
-//// SCHEDULED TASK TESTS
-//
-//template <const std::uintmax_t N, typename _task_runner> auto
-//run_n_times(_task_runner&& runner) {
-//  auto num_trues = decltype(N){};
-//
-//  auto n_times = [&] {
-//    if (num_trues < N) {
-//      ++num_trues;
-//      return true;
-//    }
-//    return false;
-//  };
-//
-//  std::forward<_task_runner>(runner).run_tasks(n_times);
-//}
-//
-//int go_called = 0;
-//auto go() { ++go_called; }
-//
-//TEST(TaskRunner, calls_successfully) {
-//  void(*const tasks[])() = { go };
-//  auto runner = rcs::make_task_runner(tasks);
-//
-//  run_n_times<0>(runner);
-//  EXPECT_EQ(0, go_called);
-//
-//  run_n_times<1>(runner);
-//  EXPECT_EQ(1, go_called);
-//
-//  run_n_times<2>(runner);
-//  EXPECT_EQ(3, go_called);
-//}
-//
-//SCHEDULED_TASK(task1, 2, go)
-//
-//class mock_system_clock {
-// public:
-//  std::uintmax_t current_micros = 0;
-//  auto micros() { return current_micros++; }
-//};
-//
-//TEST(ScheduledTask, calls) {
-//  mock_system_clock clock{};
-//  auto task1_impl = [&] { task1(clock); };
-//  //void(* const tasks[])() = { task1_impl };
-//  //auto runner = rcs::make_task_runner(tasks);
-//}
-
-#include "pch.h"
 #include "gtest/gtest.h"
+#include "pch.h"
 
 #include "../rcs/rcs.hh"
 #include "../rcs/radio.hh"
@@ -269,5 +210,3 @@ TEST(append_bytes, floating_point) {
   expect_byte_parsing_results_eq_for_type<float>();
   expect_byte_parsing_results_eq_for_type<double>();
 }
-
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%% COMMAND TESTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
