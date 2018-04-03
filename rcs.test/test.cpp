@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 #include "pch.h"
 
-#include "../rcs/rcs.hh"
 #include "../rcs/radio.hh"
 #include "../rcs/error.hh"
 #include "../rcs/utility/serialization.hh"
