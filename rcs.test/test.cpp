@@ -3,6 +3,8 @@
 
 #include "../rcs/rcs.hh"
 #include "../rcs/radio.hh"
+#include "../rcs/error.hh"
+#include "../rcs/utility/serialization.hh"
 
 #include <chrono>
 #include <cstddef>
@@ -23,9 +25,8 @@ ceiling_divide(T num, U den) {
 }
 
 using namespace rcs;
-using namespace rcs::utility;
 using namespace rcs::comm;
-using namespace rcs::comm::tele;
+using namespace rcs::utility;
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%% TELEMETRY TESTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -39,7 +40,7 @@ TEST(telemetry_send, can_send) {
     return error::none;
   };
   radio_config c{ std::move(send_bytes_impl), max_allowed };
-  send(p, c);
+  send_partitioned_payload(p, c);
 }
 
 // Tests (in general) that the auto-partitioning of radio payloads sent to 
@@ -64,7 +65,7 @@ auto test_partitioning(const payload& _payload, std::size_t max_allowed) {
   };
 
   radio_config c{ std::move(send_bytes_impl), max_allowed };
-  auto err = send(_payload, c);
+  auto err = send_partitioned_payload(_payload, c);
 
   // across all partitions, total recvd should be same as size
   EXPECT_EQ(_payload.size, total_size_received);
@@ -101,7 +102,7 @@ TEST(telemetry_send, delegate_not_called_for_zero_size_payload) {
     return error::none;
   };
   radio_config c{ std::move(send_bytes_impl), 10 };
-  EXPECT_EQ(error::none, send(p, c));
+  EXPECT_EQ(error::none, send_partitioned_payload(p, c));
   EXPECT_FALSE(called);
 }
 

@@ -5,8 +5,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "rcsdef.hh"
-
 namespace rcs {
 
 template <std::uintmax_t Id>
