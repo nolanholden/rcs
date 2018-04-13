@@ -1,0 +1,64 @@
+syntax = "proto3";
+package rcs;
+
+import "google/protobuf/timestamp.proto";
+
+message coordinator_command {
+  bool disable_deadly_controls = 1;
+  bool launch_from_pad = 2;
+  bool force_deploy_drogue = 3;
+  bool force_deploy_main = 4;
+  bool pause_telemetry = 5;
+}
+
+message unit_quaternion {
+  int32 w = 1;
+  int32 x = 2;
+  int32 y = 3;
+  int32 z = 4
+}
+
+enum flight_phase {
+  unknown,
+  pre_flight,
+  pad,
+  boost,       // occurs 1 or more times, depending on number of stages
+  coast,
+  post_apogee, // may never happen
+  drogue_chute,
+  main_chute,
+  landed
+}
+
+message rocket_sitrep {
+  int32 id = 1;
+  flight_phase phase = 2;
+  int32 current_boost_phase = 3;
+  unit_quaternion orientation = 4;
+}
+
+enum PhoneType {
+  MOBILE = 0;
+  HOME = 1;
+  WORK = 2;
+}
+
+message PhoneNumber {
+  string number = 1;
+  PhoneType type = 2;
+}
+
+message coordinator_command {
+  bool human_safe
+  bool valid_altimeter_setting;
+  bool force_apogee
+
+  repeated PhoneNumber phones = 4;
+
+  google.protobuf.Timestamp last_updated = 5;
+}
+
+// Our address book file is just one of these.
+message AddressBook {
+  repeated Person people = 1;
+}
